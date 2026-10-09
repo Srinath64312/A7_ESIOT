@@ -1,0 +1,25 @@
+{
+    "features": [
+        "rpm",
+        "current",
+        "temperature",
+        "vibration",
+        "voltage",
+        "load",
+        "pwm_duty",
+        "current_rpm_ratio",
+        "temperature_change",
+        "vibration_change",
+        "rpm_deviation"
+    ],
+    "classes": [
+        "CRITICAL",
+        "HIGH_VIBRATION",
+        "LOW_RPM",
+        "MOTOR_ANOMALY",
+        "NORMAL",
+        "OVERHEATING",
+        "OVERLOAD"
+    ],
+    "n_samples": 10000
+}

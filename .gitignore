@@ -1,0 +1,67 @@
+# AI-MotorGuard - Ignore patterns
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.venv/
+venv/
+env/
+
+# AI Models (keep trained models under 5MB)
+# ai/models/*.joblib
+ai/models/*.pkl
+ai/models/*.h5
+
+# Environment
+.env
+
+# Node
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# STM32
+firmware/*.o
+firmware/*.elf
+firmware/*.bin
+firmware/*.hex
+firmware/*.map
+firmware/Debug/
+firmware/Release/
+firmware/.settings/
+
+# Docker
+docker-data/
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite3
+
+# Compiled
+*.pyc
+
+# Test
+.coverage
+htmlcov/
+.pytest_cache/
