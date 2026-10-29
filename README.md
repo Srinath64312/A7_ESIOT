@@ -13,6 +13,12 @@ AI-MotorGuard is an advanced, end-to-end industrial IoT solution designed for co
 ## Problem Statement
 Industrial electric motors account for roughly 70% of total industrial electricity consumption. Unplanned failures lead to significant production downtime, with costs reaching 5 to 20 times more than planned maintenance. Traditional monitoring relies on periodic, manual inspections and reactive maintenance strategies. There is a critical need for continuous, intelligent, and automated monitoring systems that can predict failures and schedule maintenance proactively.
 
+## Industrial Impact & ROI
+**The economic imperative for AI-MotorGuard is clear:**
+- **Downtime Reduction:** By shifting from reactive to predictive maintenance, industrial plants can reduce unplanned downtime by an estimated **25-40%**.
+- **Cost Savings:** In a typical medium-scale manufacturing plant, preventing a single major motor failure can save between **$5,000 to $50,000** in immediate repair costs and lost production revenue.
+- **Asset Lifespan:** Continuous health monitoring extends the operational life of motors by ensuring they operate within optimal thermal and vibration parameters, reducing capital expenditure (CAPEX) on replacement hardware.
+
 ## Objectives
 1. **Continuous Monitoring:** Implement 24/7 telemetry of motor parameters (temperature, vibration, current, RPM).
 2. **Edge Computing:** Utilize STM32 microcontrollers for high-speed, reliable sensor data acquisition.
@@ -36,7 +42,7 @@ Industrial electric motors account for roughly 70% of total industrial electrici
 - **Edge-AI Pipeline:** Fast anomaly detection and intelligent insights.
 - **Predictive Maintenance:** Reduces downtime by scheduling repairs before catastrophic failures.
 - **Real-Time IoT Dashboard:** Accessible, centralized monitoring.
-- **Dual Mode:** Includes a robust simulation mode for validation without physical hardware.
+- **Dual Mode:** Includes a robust simulation mode (Digital Twin) for validation without physical hardware.
 
 ## System Architecture
 
@@ -65,6 +71,7 @@ flowchart TD
 ```
 
 ## Hardware Architecture
+For detailed component lists and procurement specifications, see [HARDWARE_SPEC.md](HARDWARE_SPEC.md).
 - **Microcontroller:** STM32 Nucleo-H743ZI (or similar)
 - **Current Sensor:** ACS712 (Hall-effect)
 - **Temperature Sensor:** LM35 or DS18B20
@@ -116,7 +123,7 @@ flowchart TD
 - **Health Score Computation:** An algorithm that combines the anomaly score and classification probabilities to output a 0-100% health score.
 
 ## Dataset
-- **Type:** Synthetic dataset generated using physical modeling principles.
+- **Type:** Synthetic dataset generated using physical modeling principles (Digital Twin approach).
 - **Size:** 10,000+ samples.
 - **Conditions:** 7 distinct motor conditions (Normal, Bearing Imbalance, Stator Short, Overheating, Rotor Unbalance, Misalignment, Under-voltage).
 - **Features:** Correlated realistic patterns incorporating baseline physics and added gaussian noise.
