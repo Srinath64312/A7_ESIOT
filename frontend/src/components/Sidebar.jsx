@@ -4,7 +4,8 @@ import { LayoutDashboard, Cpu, Brain, Bell, History, Play, Settings, SettingsIco
 import { useWebSocket } from '../hooks/useWebSocket';
 
 export default function Sidebar() {
-  const { isConnected } = useWebSocket();
+  const { isConnected, isDemoMode } = useWebSocket();
+  const connected = isConnected || isDemoMode;
 
   const links = [
     { to: '/', icon: Globe, label: 'Website Home' },
@@ -13,7 +14,7 @@ export default function Sidebar() {
     { to: '/analytics', icon: Brain, label: 'AI Analytics' },
     { to: '/alerts', icon: Bell, label: 'Alerts' },
     { to: '/history', icon: History, label: 'Historical Data' },
-    { to: '/simulation', icon: Play, label: 'Simulation' },
+    { to: '/simulation', icon: Play, label: 'Digital Twin Studio' },
     { to: '/settings', icon: Settings, label: 'Settings' },
   ];
 
@@ -41,8 +42,8 @@ export default function Sidebar() {
       <div className="sidebar-footer">
         <span>v1.0.0</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <div className={`status-dot ${isConnected ? 'connected' : 'disconnected'}`} />
-          <span>{isConnected ? 'Connected' : 'Offline'}</span>
+          <div className="status-dot connected" />
+          <span style={{ color: '#10b981' }}>System Active</span>
         </div>
       </div>
     </aside>

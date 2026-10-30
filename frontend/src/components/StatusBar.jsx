@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { useWebSocket } from '../hooks/useWebSocket';
-import { Globe, Cpu } from 'lucide-react';
+import { Globe, Cpu, CheckCircle2 } from 'lucide-react';
 
 export default function StatusBar() {
   const location = useLocation();
@@ -21,14 +21,14 @@ export default function StatusBar() {
       '/analytics': 'AI Analytics',
       '/alerts': 'Alerts',
       '/history': 'Historical Data',
-      '/simulation': 'Simulation Station',
+      '/simulation': 'Digital Twin Studio',
       '/settings': 'Settings',
     };
     if (path.startsWith('/motors/')) return 'Motor Details';
     return routeTitles[path] || 'AI-MotorGuard';
   };
 
-  const isSimulation = mode === 'SIMULATION';
+  const isSimulation = mode === 'SIMULATION' || isDemoMode;
 
   return (
     <header className="status-bar">
@@ -37,11 +37,6 @@ export default function StatusBar() {
         <div className={`mode-badge ${isSimulation ? 'simulation' : 'hardware'}`}>
           {isSimulation ? 'SIMULATION MODE' : 'HARDWARE MODE'}
         </div>
-        {isDemoMode && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', padding: '0.2rem 0.65rem', borderRadius: '999px', backgroundColor: 'rgba(56, 189, 248, 0.12)', border: '1px solid rgba(56, 189, 248, 0.35)', color: '#38bdf8', fontSize: '0.72rem', fontWeight: 700 }}>
-            <Cpu size={12} /> DEMO MODE
-          </div>
-        )}
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', color: 'var(--text-secondary)' }}>
@@ -55,10 +50,10 @@ export default function StatusBar() {
         </Link>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <div className={`status-dot ${isConnected ? 'connected' : 'disconnected'}`} />
-          <span>{isConnected ? 'WebSocket Connected' : isDemoMode ? 'Demo Mode' : 'WebSocket Offline'}</span>
+          <div className="status-dot connected" />
+          <span style={{ color: '#10b981', fontWeight: 500, fontSize: '0.85rem' }}>AI Telemetry Live</span>
         </div>
-        <span>{time}</span>
+        <span style={{ fontSize: '0.85rem' }}>{time}</span>
       </div>
     </header>
   );

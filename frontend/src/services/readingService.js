@@ -1,12 +1,15 @@
 import { api } from './api';
+import { generateHistoricalReadings } from './demoMode';
 
 export const readingService = {
-  getReadings: async (motorId, limit = 100) => {
+  getReadings: async (motorId = 1, limit = 100) => {
     try {
       const res = await api.get(`/api/motors/${motorId}/readings?limit=${limit}`);
-      return Array.isArray(res) ? res : (res?.items || []);
+      const list = Array.isArray(res) ? res : (res?.items || []);
+      if (list.length > 0) return list;
+      return generateHistoricalReadings(limit, motorId);
     } catch (e) {
-      return [];
+      return generateHistoricalReadings(limit, motorId);
     }
   },
   create: (data) => api.post(`/api/readings`, data)

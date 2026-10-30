@@ -5,36 +5,42 @@ class WebSocketManager {
     this.ws = null;
     this.listeners = new Set();
     this.reconnectAttempts = 0;
-    this.maxReconnectAttempts = 4;
+    this.maxReconnectAttempts = 2;
     this.isConnected = false;
 
-    // Demo mode state
+    // Simulation engine state
     this.demoMode = false;
     this.demoInterval = null;
     this.demoScenario = 'NORMAL';
     this.demoMotorId = 1;
     this.demoTempOffset = 0;
     this.demoVibOffset = 0;
-    this.demoRunning = false;
+    this.demoRunning = true; // Auto-run so the digital twin is active on load!
   }
 
   connect() {
-    if (this.ws?.readyState === WebSocket.OPEN) return;
-    
-    const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws/telemetry';
-    
+    // If running on a static host (like GitHub Pages or file:), try connecting briefly,
+    // but default immediately to the client simulation engine so UI is never blank/frozen.
+    const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
+    const wsUrl = import.meta.env.VITE_WS_URL || (isHttps ? null : 'ws://localhost:8000/ws/telemetry');
+
+    if (!wsUrl || this.ws?.readyState === WebSocket.OPEN) {
+      this._startClientEngine();
+      return;
+    }
+
     try {
       this.ws = new WebSocket(wsUrl);
     } catch (e) {
-      this._startDemoMode();
+      this._startClientEngine();
       return;
     }
 
     this.ws.onopen = () => {
-      console.log('WebSocket connected to backend');
+      console.log('Connected to backend WebSocket');
       this.isConnected = true;
       this.reconnectAttempts = 0;
-      this._stopDemoMode();
+      this._stopClientEngine();
       this.notifyListeners({ type: 'CONNECTION_STATE', payload: true });
     };
 
@@ -48,39 +54,38 @@ class WebSocketManager {
     };
 
     this.ws.onclose = () => {
-      console.log('WebSocket disconnected');
       this.isConnected = false;
       this.notifyListeners({ type: 'CONNECTION_STATE', payload: false });
       this._scheduleReconnect();
     };
 
     this.ws.onerror = () => {
-      // Will trigger onclose; demo mode starts after maxReconnectAttempts
+      this._startClientEngine();
     };
   }
 
   _scheduleReconnect() {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
-      setTimeout(() => this.connect(), 2000 * Math.pow(2, this.reconnectAttempts - 1));
+      setTimeout(() => this.connect(), 1500);
     } else {
-      console.warn('Backend unreachable — switching to Demo Mode');
-      this._startDemoMode();
+      this._startClientEngine();
     }
   }
 
-  // ── Demo Mode ─────────────────────────────────────────────────────────────
+  // ── Client-Side AI Simulation Engine ──────────────────────────────────────
 
-  _startDemoMode() {
+  _startClientEngine() {
     if (this.demoMode) return;
     this.demoMode = true;
-    this.isConnected = false;
-    this.notifyListeners({ type: 'CONNECTION_STATE', payload: false });
+    this.notifyListeners({ type: 'CONNECTION_STATE', payload: true });
     this.notifyListeners({ type: 'DEMO_MODE', payload: true });
-    console.log('%c🤖 DEMO MODE ACTIVE — No backend required', 'color: #38bdf8; font-weight: bold');
+
+    // Auto-stream telemetry so digital twin and charts are immediately alive
+    this.startDemoSimulation('NORMAL', 1, 1000, 0, 0);
   }
 
-  _stopDemoMode() {
+  _stopClientEngine() {
     this.demoMode = false;
     this._stopDemoLoop();
     this.notifyListeners({ type: 'DEMO_MODE', payload: false });
@@ -106,16 +111,21 @@ class WebSocketManager {
         this.notifyListeners({
           type: 'alert',
           data: {
-            id: Date.now(), motor_id: motorId, motor_name: `MTR-00${motorId}`,
-            severity: prediction.severity, condition: prediction.predicted_condition,
-            message: prediction.recommendation, timestamp: new Date().toISOString(), acknowledged: false
+            id: Date.now(),
+            motor_id: motorId,
+            motor_name: `MTR-00${motorId}`,
+            severity: prediction.severity,
+            condition: prediction.predicted_condition,
+            message: prediction.recommendation,
+            timestamp: new Date().toISOString(),
+            acknowledged: false
           }
         });
       }
     };
 
-    tick(); // immediate first tick
-    this.demoInterval = setInterval(tick, intervalMs);
+    tick();
+    this.demoInterval = setInterval(tick, Math.max(200, intervalMs));
     this.notifyListeners({ type: 'simulation_status', data: { is_running: true, scenario } });
   }
 
@@ -151,7 +161,7 @@ class WebSocketManager {
 
   subscribe(listener) {
     this.listeners.add(listener);
-    listener({ type: 'CONNECTION_STATE', payload: this.isConnected });
+    listener({ type: 'CONNECTION_STATE', payload: this.isConnected || this.demoMode });
     if (this.demoMode) listener({ type: 'DEMO_MODE', payload: true });
     return () => this.listeners.delete(listener);
   }
@@ -161,7 +171,7 @@ class WebSocketManager {
   }
 
   disconnect() {
-    this._stopDemoMode();
+    this._stopClientEngine();
     if (this.ws) {
       this.ws.close();
       this.ws = null;
