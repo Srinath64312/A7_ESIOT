@@ -3,10 +3,11 @@ import { wsManager } from '../services/websocket';
 
 export function useWebSocket() {
   const [isConnected, setIsConnected] = useState(wsManager.isConnected);
-  const [telemetry, setTelemetry] = useState({});
-  const [alerts, setAlerts] = useState([]);
+  const [isDemoMode, setIsDemoMode]   = useState(wsManager.isDemoMode());
+  const [telemetry, setTelemetry]     = useState({});
+  const [alerts, setAlerts]           = useState([]);
   const [predictions, setPredictions] = useState({});
-  const [mode, setMode] = useState('HARDWARE');
+  const [mode, setMode]               = useState('HARDWARE');
 
   useEffect(() => {
     wsManager.connect();
@@ -14,6 +15,8 @@ export function useWebSocket() {
     const handleMessage = (data) => {
       if (data.type === 'CONNECTION_STATE') {
         setIsConnected(data.payload);
+      } else if (data.type === 'DEMO_MODE') {
+        setIsDemoMode(data.payload);
       } else if (data.type === 'telemetry') {
         setTelemetry(prev => ({ ...prev, [data.data.motor_id]: data.data }));
       } else if (data.type === 'prediction') {
@@ -29,5 +32,5 @@ export function useWebSocket() {
     return () => unsubscribe();
   }, []);
 
-  return { isConnected, telemetry, alerts, predictions, mode };
+  return { isConnected, isDemoMode, telemetry, alerts, predictions, mode };
 }
