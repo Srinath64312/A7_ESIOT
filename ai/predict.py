@@ -29,40 +29,60 @@ class MotorPredictor:
         except Exception as e:
             print(f"Could not load models: {e}")
             
-    def compute_health_score(self, anomaly_score, condition, telemetry):
-        # anomaly_score is from IsolationForest: -1 (anomaly) to 1 (normal)
-        # map to 0-1 probability of anomaly
-        anomaly_prob = 1 - (anomaly_score + 1) / 2
+    def compute_health_score(self, anomaly_score, condition, telemetry, confidence=1.0):
+        """
+        Data-driven Composite Health Score:
+        Health Score = (1 - Anomaly Probability) * Confidence * Physics Degradation Factor - Condition Penalty
+        """
+        # decision_function from Isolation Forest: positive = normal, negative = anomaly
+        anomaly_prob = float(np.clip(1.0 - (anomaly_score + 0.5), 0.0, 1.0))
+        conf_factor = float(np.clip(confidence, 0.5, 1.0))
         
-        score = 100 - (anomaly_prob * 30)
+        # Physics factor degradation calculation based on operating boundaries
+        physics_factor = 1.0
+        if telemetry:
+            temp = float(telemetry.get('temperature', 50.0))
+            vib = float(telemetry.get('vibration', 1.2))
+            current = float(telemetry.get('current', 4.0))
+
+            if temp > 50.0:
+                physics_factor -= min(0.35, max(0.0, (temp - 50.0) / 55.0) * 0.35)
+            if vib > 1.2:
+                physics_factor -= min(0.40, max(0.0, (vib - 1.2) / 13.8) * 0.40)
+            if current > 4.0:
+                physics_factor -= min(0.25, max(0.0, (current - 4.0) / 14.0) * 0.25)
+
+        physics_factor = max(0.1, physics_factor)
+        base_ai_ratio = 1.0 - (anomaly_prob * 0.70)
         
-        if condition == 'NORMAL':
-            pass
-        elif condition in ['LOW_RPM', 'HIGH_VIBRATION']:
-            score -= 20
-        elif condition in ['OVERLOAD', 'OVERHEATING']:
-            score -= 40
-        elif condition == 'MOTOR_ANOMALY':
-            score -= 50
-        elif condition == 'CRITICAL':
-            score -= 80
-            
-        return max(0, min(100, int(score)))
+        condition_penalties = {
+            'NORMAL': 0,
+            'LOW_RPM': 15,
+            'HIGH_VIBRATION': 25,
+            'OVERLOAD': 35,
+            'OVERHEATING': 40,
+            'MOTOR_ANOMALY': 50,
+            'CRITICAL': 75
+        }
+        penalty = condition_penalties.get(condition, 10)
+        
+        raw_score = (base_ai_ratio * conf_factor * physics_factor * 100.0) - penalty
+        return max(0, min(100, int(round(raw_score))))
 
     def generate_recommendation(self, condition, severity, telemetry):
         if condition == 'NORMAL':
-            return "Monitor normally."
+            return "Motor operating within nominal physical bounds. Monitor routinely."
         elif condition == 'OVERLOAD':
-            return "Reduce load immediately. Check for physical blockages."
+            return "Reduce mechanical load immediately. Inspect shaft and coupling alignment."
         elif condition == 'OVERHEATING':
-            return "Cooling system check required. Stop operation if temperature > 90C."
+            return "Thermal safety threshold breached. Inspect coolant and heat dissipation fans."
         elif condition == 'HIGH_VIBRATION':
-            return "Check bearings and mounting alignment."
+            return "Severe vibration detected. Inspect bearings and base mounting bolts."
         elif condition == 'LOW_RPM':
-            return "Check power supply and phase balance."
+            return "RPM below nominal rating. Verify electrical phase balance and motor supply."
         elif condition == 'CRITICAL':
-            return "SHUTDOWN IMMEDIATELY. Complete maintenance required."
-        return "Schedule inspection."
+            return "EMERGENCY SHUTDOWN RECOMMENDED: Multiple telemetry anomalies detected."
+        return "Schedule preventive inspection."
         
     def predict(self, telemetry_dict):
         if not self.rf:
@@ -87,7 +107,7 @@ class MotorPredictor:
         prob = self.rf.predict_proba(X_scaled)[0]
         confidence = float(np.max(prob))
         
-        health_score = self.compute_health_score(anomaly_score, condition, telemetry_dict)
+        health_score = self.compute_health_score(anomaly_score, condition, telemetry_dict, confidence=confidence)
         
         severity = "HIGH" if health_score < 50 else "LOW" if health_score > 80 else "MEDIUM"
         

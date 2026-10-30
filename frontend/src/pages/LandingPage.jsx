@@ -142,6 +142,14 @@ export default function LandingPage() {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#0a0e17', color: '#f1f5f9', fontFamily: 'Inter, system-ui, sans-serif' }}>
       
+      {/* Top Banner Alert */}
+      <div style={{ backgroundColor: 'rgba(56, 189, 248, 0.12)', borderBottom: '1px solid rgba(56, 189, 248, 0.25)', padding: '0.6rem 1rem', textAlign: 'center', fontSize: '0.875rem' }}>
+        <span>✨ <strong>Digital Twin Visualizer & Custom Simulation Studio</strong> is active! </span>
+        <Link to="/simulation" style={{ color: '#38bdf8', fontWeight: 700, marginLeft: '0.5rem', textDecoration: 'none' }}>
+          Launch Digital Twin Studio &rarr;
+        </Link>
+      </div>
+      
       {/* ── TOP WEBSITE NAVBAR ───────────────────────────────────────────── */}
       <header style={{ 
         position: 'sticky', top: 0, zIndex: 100, 
@@ -246,6 +254,21 @@ export default function LandingPage() {
 
         <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '3.5rem' }}>
           <Link 
+            to="/simulation"
+            style={{ 
+              display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+              background: 'linear-gradient(135deg, #0284c7 0%, #06b6d4 100%)', color: '#ffffff',
+              padding: '0.875rem 2rem', borderRadius: '10px',
+              fontWeight: 600, fontSize: '1rem', textDecoration: 'none',
+              boxShadow: '0 10px 25px rgba(6, 182, 212, 0.4)',
+              transition: 'transform 0.2s'
+            }}
+          >
+            <Play size={18} />
+            <span>Open Digital Twin Studio</span>
+          </Link>
+
+          <Link 
             to="/dashboard"
             style={{ 
               display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
@@ -257,7 +280,7 @@ export default function LandingPage() {
             }}
           >
             <BarChart3 size={18} />
-            <span>Open Real-Time Dashboard</span>
+            <span>Open Dashboard</span>
           </Link>
 
           <a 

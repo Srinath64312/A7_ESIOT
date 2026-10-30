@@ -9,7 +9,9 @@ async def start_simulation(request: SimulationStartRequest):
     simulation_engine.start(
         scenario=request.scenario,
         motor_id=request.motor_id,
-        interval_ms=request.interval_ms
+        interval_ms=request.interval_ms,
+        temp_offset=request.temp_offset,
+        vib_offset=request.vib_offset
     )
     return simulation_engine.get_status()
 

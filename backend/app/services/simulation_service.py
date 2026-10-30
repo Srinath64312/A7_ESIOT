@@ -19,20 +19,24 @@ class SimulationEngine:
             cls._instance.motor_id = None
             cls._instance.interval_ms = 1000
             cls._instance.tick_count = 0
+            cls._instance.temp_offset = 0.0
+            cls._instance.vib_offset = 0.0
             cls._instance.task = None
             cls._instance.scenarios_cycle = ["NORMAL", "OVERLOAD", "OVERHEATING", "HIGH_VIBRATION", "LOW_RPM", "CRITICAL"]
         return cls._instance
 
-    def start(self, scenario: str, motor_id: int, interval_ms: int):
+    def start(self, scenario: str, motor_id: int, interval_ms: int, temp_offset: float = 0.0, vib_offset: float = 0.0):
         self.scenario = scenario
         self.motor_id = motor_id
         self.interval_ms = interval_ms
+        self.temp_offset = temp_offset
+        self.vib_offset = vib_offset
         self.tick_count = 0
-        
+
         if not self.running:
             self.running = True
             self.task = asyncio.create_task(self._run_loop())
-            logger.info(f"Simulation started: Scenario {scenario} on Motor {motor_id}")
+            logger.info(f"Simulation started: Scenario {scenario} on Motor {motor_id} with offsets T:{temp_offset}, V:{vib_offset}")
 
     def stop(self):
         self.running = False
@@ -46,7 +50,9 @@ class SimulationEngine:
             "running": self.running,
             "scenario": self.scenario,
             "motor_id": self.motor_id,
-            "tick_count": self.tick_count
+            "tick_count": self.tick_count,
+            "temp_offset": self.temp_offset,
+            "vib_offset": self.vib_offset
         }
 
     async def _run_loop(self):
@@ -61,7 +67,6 @@ class SimulationEngine:
                 logger.error(f"Simulation tick error: {e}")
 
     async def _generate_and_process_tick(self):
-        # Determine active scenario for AUTO
         active_scenario = self.scenario
         if self.scenario == "AUTO":
             idx = (self.tick_count // 30) % len(self.scenarios_cycle)
@@ -74,8 +79,6 @@ class SimulationEngine:
             await ingest_reading(db, reading_create)
 
     def _generate_telemetry(self, scenario: str) -> dict:
-        base_temp = 50.0
-        
         data = {
             "motor_id": self.motor_id,
             "timestamp": datetime.now(timezone.utc),
@@ -144,17 +147,20 @@ class SimulationEngine:
                 "pwm_duty": 100.0
             })
         else:
-            # Fallback normal
             data.update({
-                "rpm": 1500, "current": 4.0, "temperature": 50, 
+                "rpm": 1500, "current": 4.0, "temperature": 50,
                 "vibration": 1.2, "voltage": 230, "load": 45, "pwm_duty": 80
             })
+
+        # Apply Custom Offsets from the Digital Twin Control Panel
+        data["temperature"] = data.get("temperature", 50) + self.temp_offset
+        data["vibration"] = data.get("vibration", 1.2) + self.vib_offset
 
         # ensure positive values where it matters
         data["rpm"] = max(0, data["rpm"])
         data["current"] = max(0, data["current"])
         data["vibration"] = max(0, data["vibration"])
-        
+
         return data
 
 simulation_engine = SimulationEngine()
