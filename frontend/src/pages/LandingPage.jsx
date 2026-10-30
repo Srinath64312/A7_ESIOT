@@ -179,10 +179,10 @@ export default function LandingPage() {
           </div>
 
           <nav style={{ display: 'flex', alignItems: 'center', gap: '1.75rem' }}>
-            <a href="#overview" style={{ fontSize: '0.875rem', color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }}>Overview</a>
-            <a href="#architecture" style={{ fontSize: '0.875rem', color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }}>Architecture</a>
-            <a href="#sandbox" style={{ fontSize: '0.875rem', color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }}>Live Simulator</a>
-            <a href="#features" style={{ fontSize: '0.875rem', color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }}>Capabilities</a>
+            <a href="#overview"     onClick={(e)=>{e.preventDefault();document.getElementById("overview")?.scrollIntoView({behavior:"smooth"})}} style={{ fontSize: '0.875rem', color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }}>Overview</a>
+            <a href="#architecture" onClick={(e)=>{e.preventDefault();document.getElementById("architecture")?.scrollIntoView({behavior:"smooth"})}} style={{ fontSize: '0.875rem', color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }}>Architecture</a>
+            <a href="#sandbox"      onClick={(e)=>{e.preventDefault();document.getElementById("sandbox")?.scrollIntoView({behavior:"smooth"})}} style={{ fontSize: '0.875rem', color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }}>Live Simulator</a>
+            <a href="#features"     onClick={(e)=>{e.preventDefault();document.getElementById("features")?.scrollIntoView({behavior:"smooth"})}} style={{ fontSize: '0.875rem', color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }}>Capabilities</a>
             <Link to="/simulation" style={{ fontSize: '0.875rem', color: '#38bdf8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
               <Play size={14} /> Full Sim
             </Link>
@@ -284,7 +284,7 @@ export default function LandingPage() {
           </Link>
 
           <a 
-            href="#sandbox"
+            href="#sandbox"      onClick={(e)=>{e.preventDefault();document.getElementById("sandbox")?.scrollIntoView({behavior:"smooth"})}}
             style={{ 
               display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
               backgroundColor: 'rgba(255, 255, 255, 0.05)', color: '#f1f5f9',
@@ -299,7 +299,7 @@ export default function LandingPage() {
           </a>
 
           <a 
-            href="#architecture"
+            href="#architecture" onClick={(e)=>{e.preventDefault();document.getElementById("architecture")?.scrollIntoView({behavior:"smooth"})}}
             style={{ 
               display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
               backgroundColor: 'transparent', color: '#94a3b8',
